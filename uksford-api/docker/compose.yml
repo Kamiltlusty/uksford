@@ -1,0 +1,13 @@
+services:
+  uksford_db:
+    image: postgres:18
+    container_name: uksford_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: uksford_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretuksford
+    volumes:
+      - ./../src/main/resources/user-init.sql:/docker-entrypoint-initdb.d/user-init.sql
+    restart: unless-stopped

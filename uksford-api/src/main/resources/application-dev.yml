@@ -2,3 +2,22 @@ logging:
   level:
     pl.uksford.api: DEBUG
 
+spring:
+  datasource:
+    url: 'jdbc:postgresql://localhost:5432/uksford_db'
+    username: 'dev_user'
+    password: 'dev_password'
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    url: 'jdbc:postgresql://localhost:5432/uksford_db'
+    password: 'flyway_password'
+    user: 'flyway'
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: public
