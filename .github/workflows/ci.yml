@@ -18,8 +18,9 @@ jobs:
           java-version: '25'
           distribution: 'corretto'
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
-
       - name: Build with Gradle
-        run: ./gradlew test
+        run: |
+          cd uksford-api
+          chmod +x gradlew
+          ./gradlew test
+
