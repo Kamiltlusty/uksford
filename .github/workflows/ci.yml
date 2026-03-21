@@ -1,0 +1,26 @@
+name: ci.yml
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'corretto'
+
+      - name: Build with Gradle
+        run: |
+          cd uksford-api
+          chmod +x gradlew
+          ./gradlew test
+

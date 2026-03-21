@@ -58,6 +58,26 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 }
 
-tasks.named('test') {
+tasks.named('test', Test) {
+    include("**/*Test.class")
     useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams = true
+        events = ["passed", "failed", "skipped"]
+    }
+}
+
+tasks.register('itTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    include("**/*IT.class")
+    useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams = true
+        events = ["passed", "failed", "skipped"]
+    }
 }
