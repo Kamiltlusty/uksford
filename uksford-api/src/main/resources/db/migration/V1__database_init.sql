@@ -1,8 +1,3 @@
--- =====================================================
--- PostgreSQL 18 translation of Oracle 21c schema
--- with ENUM types for USERS.ROLE and INSTRUCTORS.ACADEMIC_DEGREE
--- =====================================================
-
 -- Create ENUM types -------------------------------------------------
 CREATE TYPE user_role AS ENUM ('ADMIN', 'USER');
 
