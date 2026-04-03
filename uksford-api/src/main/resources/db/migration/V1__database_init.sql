@@ -1,57 +1,59 @@
--- Create ENUM types -------------------------------------------------
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TYPE user_role AS ENUM ('ADMIN', 'USER');
 
 -- Placeholder for academic_degree – you can add real values later with:
 -- ALTER TYPE academic_degree ADD VALUE 'new_value' [ { BEFORE | AFTER } existing_value ];
-CREATE TYPE academic_degree AS ENUM ('mgr.', 'dok.', 'dok. hab.', 'prof. uczelni', 'prof.', 
-                                     'mgr. inż', 'dok. inż', 'dok. hab. inż.');
+CREATE TYPE academic_degree AS ENUM ('mgr.', 'dok.', 'dok. hab.', 'prof. uczelni', 'prof.',
+    'mgr. inż', 'dok. inż', 'dok. hab. inż.');
 
 -- Table: USERS ------------------------------------------------------
 CREATE TABLE users (
-    user_id   INT          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    email     VARCHAR(50)  NOT NULL,
-    password  VARCHAR(50)  NOT NULL,
-    nick      VARCHAR(50)  NOT NULL,
-    role      user_role    NOT NULL,
-    CONSTRAINT usr_email_uk UNIQUE (email),
-    CONSTRAINT usr_nick_uk UNIQUE (nick)
+                       user_id   UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+                       email     VARCHAR(50)  NOT NULL,
+                       password  VARCHAR(72)  NOT NULL,
+                       nick      VARCHAR(50)  NOT NULL,
+                       role      user_role    NOT NULL,
+                       is_active boolean      NOT NULL DEFAULT true,
+                       CONSTRAINT usr_email_uk UNIQUE (email),
+                       CONSTRAINT usr_nick_uk UNIQUE (nick)
 );
 
 COMMENT ON COLUMN users.role IS 'Enum field';
 
 -- Table: COURSES ----------------------------------------------------
 CREATE TABLE courses (
-    course_id INTEGER     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    code      CHAR(15)    NOT NULL,
-    name      VARCHAR(50) NOT NULL,
-    CONSTRAINT crs_code_uk UNIQUE (code)
+                         course_id UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+                         code      CHAR(15)    NOT NULL,
+                         name      VARCHAR(50) NOT NULL,
+                         CONSTRAINT crs_code_uk UNIQUE (code)
 );
 
 -- Table: INSTRUCTORS ------------------------------------------------
 CREATE TABLE instructors (
-    instructor_id   SMALLINT        GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    last_name       VARCHAR(30)     NOT NULL,
-    first_name      VARCHAR(30)     NOT NULL,
-    academic_degree academic_degree NOT NULL
+                             instructor_id   UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
+                             last_name       VARCHAR(30)     NOT NULL,
+                             first_name      VARCHAR(30)     NOT NULL,
+                             academic_degree academic_degree NOT NULL
 );
 
 COMMENT ON COLUMN instructors.academic_degree IS 'Enum field';
 
 -- Table: REVIEWS ----------------------------------------------------
 CREATE TABLE reviews (
-    review_id        INTEGER      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    engagement       SMALLINT     NOT NULL,
-    hardness         SMALLINT     NOT NULL,
-    posted_at      TIMESTAMP    NOT NULL,
-    user_id          INTEGER      NOT NULL,
-    course_id        INTEGER      NOT NULL,
-    content          VARCHAR(1000),
-    original_content VARCHAR(1000),
-    updated_at     TIMESTAMP,
-    CONSTRAINT rev_usr_fk FOREIGN KEY (user_id) REFERENCES users (user_id),
-    CONSTRAINT rev_crs_fk FOREIGN KEY (course_id) REFERENCES courses (course_id),
-    CONSTRAINT rev_eng_val_chk CHECK (engagement BETWEEN 0 AND 100),
-    CONSTRAINT rev_hard_val_chk CHECK (hardness BETWEEN 0 AND 100)
+                         review_id        UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+                         engagement       SMALLINT     NOT NULL,
+                         hardness         SMALLINT     NOT NULL,
+                         posted_at        TIMESTAMP    NOT NULL,
+                         user_id          UUID         NOT NULL,
+                         course_id        UUID         NOT NULL,
+                         content          VARCHAR(1000),
+                         original_content VARCHAR(1000),
+                         updated_at       TIMESTAMP,
+                         CONSTRAINT rev_usr_fk FOREIGN KEY (user_id) REFERENCES users (user_id),
+                         CONSTRAINT rev_crs_fk FOREIGN KEY (course_id) REFERENCES courses (course_id),
+                         CONSTRAINT rev_eng_val_chk CHECK (engagement BETWEEN 0 AND 100),
+                         CONSTRAINT rev_hard_val_chk CHECK (hardness BETWEEN 0 AND 100)
 );
 
 COMMENT ON COLUMN reviews.content          IS 'Users'' opinion about course.';
@@ -62,17 +64,17 @@ CREATE INDEX rev_crs_fk_idx ON reviews (course_id);
 
 -- Table: COMMENTS ---------------------------------------------------
 CREATE TABLE comments (
-    comment_id        INTEGER      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    content   VARCHAR(800) NOT NULL,
-    user_id           INTEGER      NOT NULL,
-    review_id         INTEGER      NOT NULL,
-    posted_at       TIMESTAMP    NOT NULL,
-    parent_comment_id INTEGER,
-    updated_at      TIMESTAMP,
-    original_content  VARCHAR(800),
-    CONSTRAINT com_com_fk FOREIGN KEY (parent_comment_id) REFERENCES comments (comment_id),
-    CONSTRAINT com_rev_fk FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE,
-    CONSTRAINT com_usr_fk FOREIGN KEY (user_id) REFERENCES users (user_id)
+                          comment_id        UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+                          content           VARCHAR(800) NOT NULL,
+                          user_id           UUID         NOT NULL,
+                          review_id         UUID         NOT NULL,
+                          posted_at         TIMESTAMP    NOT NULL,
+                          parent_comment_id UUID,
+                          updated_at        TIMESTAMP,
+                          original_content  VARCHAR(800),
+                          CONSTRAINT com_com_fk FOREIGN KEY (parent_comment_id) REFERENCES comments (comment_id),
+                          CONSTRAINT com_rev_fk FOREIGN KEY (review_id) REFERENCES reviews (review_id),
+                          CONSTRAINT com_usr_fk FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
 COMMENT ON TABLE comments IS 'Comments about reviews left by other users.';
@@ -84,11 +86,11 @@ CREATE INDEX com_usr_fk_idx ON comments (user_id);
 
 -- Table: CONDUCTED_CLASSES ------------------------------------------
 CREATE TABLE conducted_classes (
-    review_id     INTEGER  NOT NULL,
-    instructor_id SMALLINT NOT NULL,
-    CONSTRAINT cdcls_pk PRIMARY KEY (review_id, instructor_id),
-    CONSTRAINT cdcls_rev_fk FOREIGN KEY (review_id) REFERENCES reviews (review_id),
-    CONSTRAINT cdcls_inst_fk FOREIGN KEY (instructor_id) REFERENCES instructors (instructor_id)
+                                   review_id     UUID  NOT NULL,
+                                   instructor_id UUID  NOT NULL,
+                                   CONSTRAINT cdcls_pk PRIMARY KEY (review_id, instructor_id),
+                                   CONSTRAINT cdcls_rev_fk FOREIGN KEY (review_id) REFERENCES reviews (review_id),
+                                   CONSTRAINT cdcls_inst_fk FOREIGN KEY (instructor_id) REFERENCES instructors (instructor_id)
 );
 
 COMMENT ON TABLE conducted_classes IS 'Reviewed course can have multiple instructors, as well as one instructor can conduct multiple courses.';
@@ -97,17 +99,16 @@ CREATE INDEX cdcls_inst_fk_idx ON conducted_classes (instructor_id);
 
 -- Table: VOTES ------------------------------------------------------
 CREATE TABLE votes (
-    user_id   INTEGER NOT NULL,
-    review_id INTEGER NOT NULL,
-    is_useful BOOLEAN NOT NULL,
-    CONSTRAINT vt_pk PRIMARY KEY (review_id, user_id),
-    CONSTRAINT vt_usr_fk FOREIGN KEY (user_id) REFERENCES users (user_id),
-    CONSTRAINT vt_rev_fk FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
+                       user_id   UUID    NOT NULL,
+                       review_id UUID    NOT NULL,
+                       is_useful BOOLEAN NOT NULL,
+                       CONSTRAINT vt_pk PRIMARY KEY (review_id, user_id),
+                       CONSTRAINT vt_usr_fk FOREIGN KEY (user_id) REFERENCES users (user_id),
+                       CONSTRAINT vt_rev_fk FOREIGN KEY (review_id) REFERENCES reviews (review_id)
 );
 
 COMMENT ON TABLE votes IS 'Users leave positive or negative vote about review. If this record doesn''t exist for concrete user-review pair, that means concrete user didn''t leave vote for a review.';
-COMMENT ON COLUMN votes.is_useful IS 'true - review was useful
-false - review was not useful';
+COMMENT ON COLUMN votes.is_useful IS 'true - review was useful false - review was not useful';
 
 -- =====================================================
 -- Triggers to prevent updating foreign key columns
@@ -127,7 +128,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER fkntm_comments
     BEFORE UPDATE OF user_id, review_id ON comments
     FOR EACH ROW
-    EXECUTE FUNCTION fkntm_comments();
+EXECUTE FUNCTION fkntm_comments();
 
 -- Trigger for REVIEWS
 CREATE OR REPLACE FUNCTION fkntm_reviews() RETURNS TRIGGER AS $$
@@ -142,7 +143,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER fkntm_reviews
     BEFORE UPDATE OF user_id, course_id ON reviews
     FOR EACH ROW
-    EXECUTE FUNCTION fkntm_reviews();
+EXECUTE FUNCTION fkntm_reviews();
 
 -- Trigger for VOTES
 CREATE OR REPLACE FUNCTION fkntm_votes() RETURNS TRIGGER AS $$
@@ -157,4 +158,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER fkntm_votes
     BEFORE UPDATE OF user_id, review_id ON votes
     FOR EACH ROW
-    EXECUTE FUNCTION fkntm_votes();
+EXECUTE FUNCTION fkntm_votes();

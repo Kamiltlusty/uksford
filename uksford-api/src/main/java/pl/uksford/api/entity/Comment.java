@@ -5,10 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,8 +20,8 @@ import java.util.Set;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id", nullable = false)
-    private Integer id;
+    @Column(name = "comment_id", nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID id;
 
     @Size(max = 800)
     @NotNull
@@ -27,13 +30,13 @@ public class Comment {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false) // TODO should it really be nullable? When user get banned/removed we don't want to remove its' comments, votes or reviews, therefore should
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // @OnDelete(action = OnDeleteAction.CASCADE) might cause problems with db. Same as with votes and review
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "review_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Review review;
 
     @NotNull

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -14,10 +16,10 @@ public class Vote {
     @EmbeddedId
     private VoteId id = new VoteId();
 
-    // @OnDelete(action = OnDeleteAction.CASCADE) this might cause problems, db can handle it on its own
     @MapsId("reviewId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "review_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Review review;
 
     @MapsId("userId")
