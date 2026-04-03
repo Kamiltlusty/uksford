@@ -4,31 +4,24 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnTransformer;
 import pl.uksford.api.converter.AcademicDegreeConverter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "instructors")
 public class Instructor {
 
-    public Instructor(String lastName, String firstName, AcademicDegree academicDegree) {
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.academicDegree = academicDegree;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "instructor_id", nullable = false)
-    private Short id;
+    @Column(name = "instructor_id", nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID id;
 
     @Size(max = 30)
     @NotNull

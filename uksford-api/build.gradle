@@ -1,15 +1,7 @@
-buildscript {
-    dependencies {
-        // Use the same version as your Flyway plugin
-        classpath("org.flywaydb:flyway-database-postgresql:12.2.0")
-    }
-}
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.3'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "org.flywaydb.flyway" version "12.2.0"
 }
 
 group = 'pl.uksford'
@@ -64,9 +56,9 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.flywaydb:flyway-core:12.2.0'
-    runtimeOnly "org.flywaydb:flyway-database-postgresql:12.2.0"
-
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 }
 
 tasks.named('test', Test) {
@@ -91,12 +83,4 @@ tasks.register('itTest', Test) {
         showStandardStreams = true
         events = ["passed", "failed", "skipped"]
     }
-}
-
-flyway {
-    url = 'jdbc:postgresql://localhost:5432/uksford_db'
-    driver = 'org.postgresql.Driver'
-    user = 'flyway'
-    password = 'flyway_password'
-    locations = ['classpath:db/migration']
 }

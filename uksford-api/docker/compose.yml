@@ -1,6 +1,6 @@
 services:
   uksford_db:
-    image: postgres:18
+    image: postgres:17
     container_name: uksford_db
     ports:
       - "5432:5432"

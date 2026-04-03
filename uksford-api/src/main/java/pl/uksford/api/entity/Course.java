@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,8 +17,8 @@ import java.util.Set;
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "course_id", nullable = false)
-    private Integer id;
+    @Column(name = "course_id", nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID id;
 
     @Size(max = 15)
     @NotNull

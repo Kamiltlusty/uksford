@@ -10,6 +10,7 @@ import pl.uksford.api.converter.UserRoleConverter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,8 +20,8 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", nullable = false)
-    private Integer id;
+    @Column(name = "user_id", nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID id;
 
     @Size(max = 50)
     @NotNull
