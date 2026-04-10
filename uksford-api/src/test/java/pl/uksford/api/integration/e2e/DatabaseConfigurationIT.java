@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import pl.uksford.api.configuration.TestcontainersInitializer;
@@ -20,11 +23,12 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Transactional
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@JdbcTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = TestcontainersInitializer.class)
 public class DatabaseConfigurationIT {
     @Autowired
-    private EntityManager em;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private DataSource ds;
@@ -46,9 +50,10 @@ public class DatabaseConfigurationIT {
     void whenQueryDatabase_shouldProperlyFetchAcademicDegrees() {
         // given
         // when
-        List<String> actual = new ArrayList<>(em.createNativeQuery(
-                "select * from unnest(enum_range(NULL::academic_degree))"
-        ).getResultList());
+        List<String> actual = new ArrayList<>(jdbcTemplate.queryForList(
+                "select * from unnest(enum_range(NULL::academic_degree))",
+                String.class
+        ));
         // then
         List<String> expected = getListOfAcademicDegrees();
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);

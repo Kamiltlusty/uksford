@@ -12,7 +12,8 @@ public class TestcontainersInitializer implements ApplicationContextInitializer<
     public static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17-alpine")
             .withDatabaseName("uksford_db")
             .withUsername("dev_user")
-            .withPassword("dev_password");
+            .withPassword("dev_password")
+            .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext ctx) {
