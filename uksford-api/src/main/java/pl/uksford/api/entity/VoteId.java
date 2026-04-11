@@ -11,6 +11,7 @@ import org.hibernate.Hibernate;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -21,11 +22,11 @@ public class VoteId implements Serializable {
 
     @NotNull
     @Column(name = "review_id", nullable = false)
-    private Integer reviewId;
+    private UUID reviewId;
 
     @NotNull
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private UUID userId;
 
     @Override
     public boolean equals(Object o) {
