@@ -1,6 +1,9 @@
 name: ci.yml
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - config/add-job-for-integration-tests
+
 
 #  pull_request:
 #    branches:
