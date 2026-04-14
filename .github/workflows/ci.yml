@@ -47,11 +47,17 @@ jobs:
           java-version: '25'
           distribution: 'corretto'
 
-      - name: Start uksford_db container
+      - name: Start uksford_db container service
         run: |
           cd docker
           docker compose up -d uksford_db
-        
+
+      - name: Check uksford_db health
+        uses: jaracogmbh/docker-compose-health-check-action@v1.0.0
+        with:
+          max-retries: 30
+          retry-interval: 10
+          compose-file: "uksford-api/docker/compose.yml"
 
       - name: Build with Gradle
         run: |
