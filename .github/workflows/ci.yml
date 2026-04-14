@@ -35,6 +35,7 @@ jobs:
 
   run-integration-tests:
     runs-on: ubuntu-latest
+    needs: run-unit-tests
 
     steps:
       - name: Checkout code
@@ -45,6 +46,12 @@ jobs:
         with:
           java-version: '25'
           distribution: 'corretto'
+
+      - name: Start uksford_db container
+        run: |
+          cd docker
+          docker compose up -d uksford_db
+        
 
       - name: Build with Gradle
         run: |
