@@ -10,4 +10,9 @@ services:
       POSTGRES_PASSWORD: secretuksford
     volumes:
       - ./../src/main/resources/user-init.sql:/docker-entrypoint-initdb.d/user-init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
