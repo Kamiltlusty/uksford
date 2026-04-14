@@ -1,13 +1,8 @@
 name: ci.yml
 on:
-  push:
+  pull_request:
     branches:
-      - config/add-job-for-integration-tests
-
-
-#  pull_request:
-#    branches:
-#      - main
+      - main
 
 # sets working directory for all the jobs
 defaults:
